@@ -25,7 +25,6 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <SpeedInsights />
       <html lang="en">
         <body className={poppins.variable}>{children}</body>
       </html>
