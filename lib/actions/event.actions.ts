@@ -1,6 +1,10 @@
 "use server";
 
-import { CreateEventParams, GetAllEventsParams } from "@/types";
+import {
+  CreateEventParams,
+  DeleteEventParams,
+  GetAllEventsParams,
+} from "@/types";
 import { handleError } from "../utils";
 import { connectToDatabase } from "../database";
 import User from "../database/models/user.model";
@@ -61,21 +65,31 @@ export async function getAllEvents({
   try {
     await connectToDatabase();
 
-    const conditions = {}
+    const conditions = {};
 
     const eventsQuery = Event.find(conditions)
-    .sort({ createdAt: 'desc' })
+      .sort({ createdAt: "desc" })
       .skip(0)
       .limit(limit);
 
-      const events = await populateEvent(eventsQuery);
-      const eventsCount = await Event.countDocuments(conditions);
+    const events = await populateEvent(eventsQuery);
+    const eventsCount = await Event.countDocuments(conditions);
 
-      return {
-        data: JSON.parse(JSON.stringify(events)),
-        totalPages: Math.ceil(eventsCount / limit),
-      }
+    return {
+      data: JSON.parse(JSON.stringify(events)),
+      totalPages: Math.ceil(eventsCount / limit),
+    };
+  } catch (error) {
+    handleError(error);
+  }
+}
 
+export async function deleteEvent({ eventId, path }: DeleteEventParams) {
+  try {
+    await connectToDatabase();
+
+    const deleteEvent = await Event.findByIdAndDelete(eventId);
+    if (deleteEvent) revalidatePath(path);
   } catch (error) {
     handleError(error);
   }
